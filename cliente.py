@@ -45,7 +45,10 @@ def enviar_paquete(flags_a_enviar, seq_ack):
         pkt = crear_paquete(5000, 8000, seq_ack[0], seq_ack[1], flags_a_enviar)
         f.envio_paquetes_inseguro(pkt)
         print("Se ha enviado el paquete de seq " + str(pkt[TCP].seq) + " y ack " + str(pkt[TCP].ack) + ".")
-        pkt_capturado = esperar_ack(5000, 3, False)
+        if len(bytes(pkt[TCP])) != 20 or pkt[TCP].flags != ['A']:
+            pkt_capturado = esperar_ack(5000, 3, False)
+        else:
+            break
         if len(pkt_capturado) == 0: 
             print("Se retransmite el paquete de seq " + str(pkt[TCP].seq) + " por timeout.")
         elif pkt_capturado[0][TCP].chksum != len(bytes(pkt_capturado[0][TCP])):
