@@ -1,7 +1,7 @@
-import canalruidoso as f # Correr pip install canalruidoso en la terminal
-from scapy.all import * # Correr pip install scapy en la terminal
-from scapy.layers.inet import IP,TCP
+from funciones import *
 import random
+
+'''
 
 def calcular_checksum(packet):
     packet[TCP].chksum = None
@@ -66,15 +66,26 @@ def esperar_request(flags_a_enviar, seq_ack):
         print("Se ha recibido correctamente el paquete de seq " + str(pkt_capturado[0][TCP].seq) + " y ack " + str(pkt_capturado[0][TCP].ack) + ".")
         seq_ack[1] = pkt_capturado[0][TCP].seq + 1
 
+def envio_seguro(flags_a_enviar, seq_ack):
+    pkt = crear_paquete(5000, 8000, seq_ack[0], seq_ack[1], flags_a_enviar)
+    f.envio_paquetes_inseguro(pkt)
+    print("Se ha enviado el paquete de seq " + str(pkt[TCP].seq) + " y ack " + str(pkt[TCP].ack) + ".")
+    esperar_request(flags_a_enviar, seq_ack)
+
 nro_random = random.randint(1, 10000)
 seq_y_ack = [nro_random, 0]
-enviar_paquete(['S'], seq_y_ack)
-esperar_request(['S'], seq_y_ack)
+envio_seguro(['S'], seq_y_ack)
 
 seq_y_ack[0] += 1
 enviar_paquete(['A'], seq_y_ack)
 
+'''
 
+nro_random = random.randint(1, 10000)
+seq_ack = [nro_random, 0]
+enviar_request_seguro(5000, 8000, ['S'], seq_ack)
+
+esperar_y_reconocer_request(5000, seq_ack)
 
 
 
