@@ -5,11 +5,10 @@ nro_random = random.randint(1, 10000)
 seq_ack = [nro_random, 0]
 
 enviar_request(5000, 8000, ['S'], seq_ack)
-pkt_capturado = []
 enviar_syn = True
 
 while enviar_syn:
-    pkt_capturado = escuchar(5000, 3, False)
+    pkt_capturado = escuchar(5000, 3)
     paquete_perdido = len(pkt_capturado) == 0
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
     
@@ -28,12 +27,11 @@ while enviar_syn:
 
 seq_ack[0] = pkt_capturado[0][TCP].ack
 seq_ack[1] = pkt_capturado[0][TCP].seq + 1
-enviar_respuesta(pkt_capturado, seq_ack[0])
-pkt_capturado = []
+enviar_respuesta(pkt_capturado, seq_ack[0], seq_ack[1])
 enviar_ack = True
 
 while enviar_ack:
-    pkt_capturado = escuchar(5000, 10, False)
+    pkt_capturado = escuchar(5000, 10)
     ack_recibido = len(pkt_capturado) == 0   
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
     paquete_esperado = len(pkt_capturado) != 0 and pkt_capturado[0][TCP].ack == seq_ack[0]
@@ -48,13 +46,10 @@ while enviar_ack:
         print("=====")
         enviar_ack = False
 
-seq_ack[0] += 1 # corregir
-seq_ack[1] += 1
-pkt_capturado = []
 esperar_fin = True
 
 while esperar_fin:
-    pkt_capturado = escuchar(5000, 30, False)
+    pkt_capturado = escuchar(5000, 30)
     paquete_perdido = len(pkt_capturado) == 0
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
     paquete_inesperado = len(pkt_capturado) != 0 and pkt_capturado[0][TCP].ack != seq_ack[0] 
@@ -70,13 +65,14 @@ while esperar_fin:
         print("=====")
     else:
         esperar_fin = False
-    
-enviar_respuesta(pkt_capturado, pkt_capturado[0][TCP].ack)
-pkt_capturado = []
+
+seq_ack[0] = pkt_capturado[0][TCP].ack
+seq_ack[1] = pkt_capturado[0][TCP].seq + 1
+enviar_respuesta(pkt_capturado, seq_ack[0], seq_ack[1])
 enviar_fin_ack = True
 
 while enviar_fin_ack:
-    pkt_capturado = escuchar(5000, 3, False)
+    pkt_capturado = escuchar(5000, 3)
     paquete_perdido = len(pkt_capturado) == 0
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
     paquete_inesperado = len(pkt_capturado) != 0 and pkt_capturado[0][TCP].ack != seq_ack[0] + 1
@@ -97,6 +93,3 @@ while enviar_fin_ack:
         print("Se ha reconocido correctamente el paquete de seq " + str(seq_ack[0]) + " y ack " + str(seq_ack[1]) + ". Flags: FA.")
         print("=====")
         enviar_fin_ack = False
-
-
-
