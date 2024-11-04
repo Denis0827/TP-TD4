@@ -67,7 +67,7 @@ while enviar_fin:
         print("Se retransmite el paquete de seq " + str(seq_ack[0]) + " por timeout. Flags: F.")
         print("=====")
         enviar_request(8000, 5000, ['F'], seq_ack)
-    elif paquete_inesperado:
+    elif paquete_inesperado: 
         print("Se ha recibido un paquete distinto al apropiado. Se espera que se reconozca el paquete de seq " + str(seq_ack[0]) + " y ack " + str(seq_ack[1]) + ".")   
         print("=====")
         enviar_request(8000, 5000, ['F'], seq_ack)
@@ -89,14 +89,13 @@ while enviar_ack:
     pkt_capturado = escuchar(8000, 10)
     ack_recibido = len(pkt_capturado) == 0  
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
-    fin_ack_retransmitido = len(pkt_capturado) != 0 and pkt_capturado[0][TCP].ack == seq_ack[0] 
     
     if paquete_corrupto: 
         print("El paquete recibido de seq " + str(pkt_capturado[0][TCP].seq) + " y ack " + str(pkt_capturado[0][TCP].ack) + " está corrupto. Flags: FA.")
         print("=====")
-    elif fin_ack_retransmitido:
-        enviar_respuesta(pkt_capturado, pkt_capturado[0][TCP].ack)
     elif ack_recibido: 
         print("Se ha cerrado correctamente la conexión.")
         print("=====")
         enviar_ack = False
+    else:
+        enviar_respuesta(pkt_capturado, seq_ack[0], seq_ack[1])

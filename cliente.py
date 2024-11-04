@@ -34,17 +34,17 @@ while enviar_ack:
     pkt_capturado = escuchar(5000, 10)
     ack_recibido = len(pkt_capturado) == 0   
     paquete_corrupto = len(pkt_capturado) != 0 and not(verificar_checksum(pkt_capturado[0]))
-    paquete_esperado = len(pkt_capturado) != 0 and pkt_capturado[0][TCP].ack == seq_ack[0]
     
     if paquete_corrupto: 
         print("El paquete recibido de seq " + str(pkt_capturado[0][TCP].seq) + " y ack " + str(pkt_capturado[0][TCP].ack) + " está corrupto. Flags: SA.")
         print("=====")
-    elif paquete_esperado:
-        enviar_respuesta(pkt_capturado, pkt_capturado[0][TCP].ack)
     elif ack_recibido: 
         print("Se ha establecido correctamente el handshake.")
         print("=====")
         enviar_ack = False
+    else: 
+        enviar_respuesta(pkt_capturado, seq_ack[0], seq_ack[1])
+
 
 esperar_fin = True
 
